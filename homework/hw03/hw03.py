@@ -21,6 +21,7 @@ def composer(func=lambda x: x):
     """
     def func_adder(g):
         "*** YOUR CODE HERE ***"
+        return composer(lambda x: func(g(x)))
     return func, func_adder
 
 
@@ -43,6 +44,10 @@ def g(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    if n <= 3:
+        return n
+    else:
+        return g(n-1) + g(n-2) * 2 + g(n-3) * 3
 
 def g_iter(n):
     """Return the value of G(n), computed iteratively.
@@ -63,6 +68,16 @@ def g_iter(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    if n <= 3:
+        return n
+    else:
+        pre2, pre1, cur = 1, 2, 3
+        k = 1
+        while k <= n - 3:
+            pre2, pre1, cur = pre1, cur, cur + 2 * pre1 + 3 * pre2
+            k += 1
+        return cur
+
 
 
 def missing_digits(n):
@@ -93,6 +108,28 @@ def missing_digits(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    def cal_missing(x, y):
+        """Calculate how many numbers between x and y.
+
+        x, y -- two single-digit number, and y is greater than x
+
+        >>> cal_missing(1, 1)
+        0
+        >>> cal_missing(2, 3)
+        0
+        >>> cal_missing(2, 8)
+        5 # 3, 4, 5, 6, 7, it has 5 numbers between 2 and 8
+        """
+        if x == y:
+            return 0
+        else:
+            return y - x - 1
+
+    if n < 10:
+        return 0
+    else:
+        all_but_last, last = n // 10, n % 10
+        return missing_digits(all_but_last) + cal_missing(all_but_last % 10, last)
 
 
 def count_change(total):
@@ -112,11 +149,27 @@ def count_change(total):
     True
     """
     "*** YOUR CODE HERE ***"
+    from math import floor, log2
+    k = floor(log2(total))
+
+    def helper(total, biggest_coin):
+        """Return the number of ways to make change for total while the biggest using coin is the biggest_coin."""
+        if total < 0:
+            return 0
+        elif total == 0:
+            return 1
+        elif biggest_coin <= 0:
+            return 0
+        else:
+            return helper(total - biggest_coin, biggest_coin) + helper(total, biggest_coin // 2)
+
+    return helper(total, 2 ** k)
 
 
 def print_move(origin, destination):
     """Print instructions to move a disk."""
     print("Move the top disk from rod", origin, "to rod", destination)
+
 
 def move_stack(n, start, end):
     """Print the moves required to move n disks on the start pole to the end
@@ -147,6 +200,13 @@ def move_stack(n, start, end):
     """
     assert 1 <= start <= 3 and 1 <= end <= 3 and start != end, "Bad start/end"
     "*** YOUR CODE HERE ***"
+    if n == 1:
+        print_move(start, end)
+    else:
+        move_stack(n - 1, start, 6 - start - end)
+        print_move(start, end)
+        move_stack(n - 1, 6 - start - end, end)
+
 
 
 from operator import sub, mul
@@ -161,5 +221,8 @@ def make_anonymous_factorial():
     >>> check(HW_SOURCE_FILE, 'make_anonymous_factorial', ['Assign', 'AugAssign', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
+    return (lambda f: lambda k: f(f, k))(lambda f, k: k if k == 1 else mul(k, f(f, sub(k, 1))))
+    # A cheating way
+    # from functools import reduce
+    # return lambda n: reduce(mul,sub(n-1))
 
