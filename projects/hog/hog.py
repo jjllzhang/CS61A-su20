@@ -22,6 +22,12 @@ def roll_dice(num_rolls, dice=six_sided):
     assert num_rolls > 0, 'Must roll at least once.'
     # BEGIN PROBLEM 1
     "*** YOUR CODE HERE ***"
+    def has_one(s):
+        return 1 in s
+    s = []
+    for i in range(num_rolls):
+        s += [dice()]
+    return 1 if has_one(s) else sum(s)
     # END PROBLEM 1
 
 
@@ -33,6 +39,7 @@ def free_bacon(score):
     assert score < 100, 'The game should be over.'
     # BEGIN PROBLEM 2
     "*** YOUR CODE HERE ***"
+    return 10 - score % 10 + score // 10
     # END PROBLEM 2
 
 
@@ -51,6 +58,9 @@ def take_turn(num_rolls, opponent_score, dice=six_sided):
     assert opponent_score < 100, 'The game should be over.'
     # BEGIN PROBLEM 3
     "*** YOUR CODE HERE ***"
+    if num_rolls == 0:
+        return free_bacon(opponent_score)
+    return roll_dice(num_rolls, dice)
     # END PROBLEM 3
 
 
@@ -60,6 +70,7 @@ def is_swap(player_score, opponent_score):
     """
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
+    return abs(player_score % 10 - opponent_score % 10) == opponent_score // 10 % 10
     # END PROBLEM 4
 
 
@@ -100,6 +111,25 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    tmp_score0 = take_turn(strategy0(score0, score1), score1, dice) + score0
+    if is_swap(tmp_score0, score1):
+        score0, score1 = score1, tmp_score0
+        print("DEBUG:", score0, score1)
+    else:
+        score0, score1 = tmp_score0, score1
+        print("DEBUG:", score0, score1)
+    if score0  >= goal or score1 >= goal:
+        return score0, score1
+    tmp_score1 = take_turn(strategy1(score1, score0), score0, dice) + score1
+    if is_swap(tmp_score1, score0):
+        score1, score0 = score0, tmp_score1
+        print("DEBUG:", score0, score1)
+    else:
+        score1, score0 = tmp_score1, score0
+        print("DEBUG:", score0, score1)
+    if score1 >= goal or score0 >= goal:
+        return score0, score1
+    return play(strategy0, strategy1, score0, score1, dice, goal, say, feral_hogs)
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
     # BEGIN PROBLEM 6
