@@ -3,3 +3,8 @@
 'summation_using_accumulate-correct', (1024, 70)
 'product_using_accumulate-correct', (1536, 70)
 'make_repeater-correct', (2048, 70)
+'two-correct', (2560, 70)
+'church_to_int-correct', (3072, 70)
+'add_church-correct', (3584, 70)
+'mul_church-correct', (4096, 70)
+'pow_church-correct', (4608, 70)

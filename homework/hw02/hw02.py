@@ -141,10 +141,12 @@ def successor(n):
 def one(f):
     """Church numeral 1: same as successor(zero)"""
     "*** YOUR CODE HERE ***"
+    return lambda x: f(x)
 
 def two(f):
     """Church numeral 2: same as successor(successor(zero))"""
     "*** YOUR CODE HERE ***"
+    return lambda x: f(f(x))
 
 three = successor(two)
 
@@ -161,6 +163,9 @@ def church_to_int(n):
     3
     """
     "*** YOUR CODE HERE ***"
+    def add_one(x):
+        return x + 1
+    return n(add_one)(0)
 
 def add_church(m, n):
     """Return the Church numeral for m + n, for Church numerals m and n.
@@ -169,6 +174,10 @@ def add_church(m, n):
     5
     """
     "*** YOUR CODE HERE ***"
+    int_n = church_to_int(n)
+    for i in range(int_n):
+        m = successor(m)
+    return m
 
 def mul_church(m, n):
     """Return the Church numeral for m * n, for Church numerals m and n.
@@ -180,6 +189,11 @@ def mul_church(m, n):
     12
     """
     "*** YOUR CODE HERE ***"
+    int_n = church_to_int(n)
+    total_func = zero
+    for i in range(int_n):
+        total_func = add_church(m, total_func)
+    return total_func
 
 def pow_church(m, n):
     """Return the Church numeral m ** n, for Church numerals m and n.
@@ -190,4 +204,9 @@ def pow_church(m, n):
     9
     """
     "*** YOUR CODE HERE ***"
+    int_n = church_to_int(n)
+    total_func = one
+    for i in range(int_n):
+        total_func = mul_church(m, total_func)
+    return total_func
 
