@@ -111,32 +111,33 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
-    tmp_score0 = take_turn(strategy0(score0, score1), score1, dice) + score0
-    if is_swap(tmp_score0, score1):
-        score0, score1 = score1, tmp_score0
-        print("DEBUG:", score0, score1)
-    else:
-        score0, score1 = tmp_score0, score1
-        print("DEBUG:", score0, score1)
-    if score0  >= goal or score1 >= goal:
-        return score0, score1
-    tmp_score1 = take_turn(strategy1(score1, score0), score0, dice) + score1
-    if is_swap(tmp_score1, score0):
-        score1, score0 = score0, tmp_score1
-        print("DEBUG:", score0, score1)
-    else:
-        score1, score0 = tmp_score1, score0
-        print("DEBUG:", score0, score1)
-    if score1 >= goal or score0 >= goal:
-        return score0, score1
-    return play(strategy0, strategy1, score0, score1, dice, goal, say, feral_hogs)
+    last_turn_score0, last_turn_score1 = 0, 0
+    while score0 < goal and score1 < goal:
+        if who == 0:
+            num_rolls0 = strategy0(score0, score1)
+            this_turn_score0 = take_turn(num_rolls0, score1, dice)
+            score0 += this_turn_score0
+            if feral_hogs and abs(num_rolls0 - last_turn_score0) == 2:
+                score0 += 3
+            if is_swap(score0, score1):
+                score0, score1 = score1, score0
+            last_turn_score0 = this_turn_score0
+        else:
+            num_rolls1 = strategy1(score1, score0)
+            this_turn_score1 = take_turn(num_rolls1, score0, dice)
+            score1 += this_turn_score1
+            if feral_hogs and abs(num_rolls1 - last_turn_score1) == 2:
+                score1 += 3
+            if is_swap(score1, score0):
+                score1, score0 = score0, score1
+            last_turn_score1 = this_turn_score1
+        who = other(who)
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
     # BEGIN PROBLEM 6
     "*** YOUR CODE HERE ***"
     # END PROBLEM 6
     return score0, score1
-
 
 #######################
 # Phase 2: Commentary #
