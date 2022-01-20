@@ -131,11 +131,12 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
             if is_swap(score1, score0):
                 score1, score0 = score0, score1
             last_turn_score1 = this_turn_score1
+        say = say(score0, score1)
         who = other(who)
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
+    # Actually it does mislead me at first!!!
     # BEGIN PROBLEM 6
-    "*** YOUR CODE HERE ***"
     # END PROBLEM 6
     return score0, score1
 
@@ -221,6 +222,20 @@ def announce_highest(who, last_score=0, running_high=0):
     assert who == 0 or who == 1, 'The who argument should indicate a player.'
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
+    def say(score0, score1):
+        if who == 0:
+            if (score0 - last_score) > running_high:
+                print(score0 - last_score, "point(s)! That's the biggest gain yet for Player 0")
+                return announce_highest(who, score0, score0 - last_score)
+            else:
+                return announce_highest(who, score0, running_high)
+        else:
+            if (score1 - last_score) > running_high:
+                print(score1 - last_score, "point(s)! That's the biggest gain yet for Player 1")
+                return announce_highest(who, score1, score1 - last_score)
+            else:
+                return announce_highest(who, score1, running_high)
+    return say
     # END PROBLEM 7
 
 
@@ -260,6 +275,13 @@ def make_averaged(original_function, trials_count=1000):
     """
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
+    def averaged(*args):
+        total = 0
+        for i in range(trials_count):
+            total += original_function(*args)
+        total /= trials_count
+        return total
+    return averaged
     # END PROBLEM 8
 
 
@@ -274,6 +296,21 @@ def max_scoring_num_rolls(dice=six_sided, trials_count=1000):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    s = []
+    i = 1
+    while i <= 10:
+        s += [make_averaged(roll_dice, trials_count)(i, dice)]
+        i += 1
+    max_score = 0
+    for i in range(10):
+        if max_score < s[i]:
+            max_score = s[i]
+    i = 0
+    while i <= 9:
+        if max_score == s[i]:
+            break
+        i += 1
+    return i + 1
     # END PROBLEM 9
 
 
@@ -298,7 +335,7 @@ def average_win_rate(strategy, baseline=always_roll(6)):
 
 def run_experiments():
     """Run a series of strategy experiments and report results."""
-    if True:  # Change to False when done finding max_scoring_num_rolls
+    if False:  # Change to False when done finding max_scoring_num_rolls
         six_sided_max = max_scoring_num_rolls(six_sided)
         print('Max scoring num rolls for six-sided dice:', six_sided_max)
 
@@ -311,7 +348,7 @@ def run_experiments():
     if False:  # Change to True to test swap_strategy
         print('swap_strategy win rate:', average_win_rate(swap_strategy))
 
-    if False:  # Change to True to test final_strategy
+    if True:  # Change to True to test final_strategy
         print('final_strategy win rate:', average_win_rate(final_strategy))
 
     "*** You may add additional experiments as you wish ***"
@@ -323,7 +360,11 @@ def bacon_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     rolls NUM_ROLLS otherwise.
     """
     # BEGIN PROBLEM 10
-    return 6  # Replace this statement
+    num_scores_zero = free_bacon(opponent_score)
+    if num_scores_zero >= cutoff:
+        return 0
+    else:
+        return num_rolls
     # END PROBLEM 10
 
 
@@ -333,7 +374,18 @@ def swap_strategy(score, opponent_score, cutoff=8, num_rolls=6):
     non-beneficial swap. Otherwise, it rolls NUM_ROLLS.
     """
     # BEGIN PROBLEM 11
-    return 6  # Replace this statement
+    num_scores_zero = free_bacon(opponent_score)
+    tmp_score = num_scores_zero + score
+    if is_swap(tmp_score, opponent_score):
+        if tmp_score < opponent_score:
+            return 0
+        else:
+            return num_rolls
+    else:
+        if num_scores_zero >= cutoff:
+            return 0
+        else:
+            return num_rolls
     # END PROBLEM 11
 
 
