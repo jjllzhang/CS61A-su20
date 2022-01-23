@@ -173,6 +173,15 @@ def add_trees(t1, t2):
       5
     """
     "*** YOUR CODE HERE ***"
+    if is_leaf(t1):
+        return tree(label(t1) + label(t2), branches(t2))
+    elif is_leaf(t2):
+        return tree(label(t1) + label(t2), branches(t1))
+    else:
+        fewer_branches_t, more_branches_t = sorted([branches(t1), branches(t2)], key=len)
+        pad_t1 = fewer_branches_t + [tree(0) for i in range(len(more_branches_t) - len(fewer_branches_t))]
+        pad_t2 = more_branches_t
+        return tree(label(t1) + label(t2), [add_trees(b1, b2) for b1, b2 in zip(pad_t1, pad_t2)])
 
 
 def build_successors_table(tokens):
@@ -193,8 +202,8 @@ def build_successors_table(tokens):
     prev = '.'
     for word in tokens:
         if prev not in table:
-            "*** YOUR CODE HERE ***"
-        "*** YOUR CODE HERE ***"
+            table[prev] = []
+        table[prev] += [word]
         prev = word
     return table
 
@@ -211,8 +220,11 @@ def construct_sent(word, table):
     import random
     result = ''
     while word not in ['.', '!', '?']:
-        "*** YOUR CODE HERE ***"
+        result += word + ' '
+        next_word = random.choice(table[word])
+        word = next_word
     return result.strip() + word
+
 
 def shakespeare_tokens(path='shakespeare.txt', url='http://composingprograms.com/shakespeare.txt'):
     """Return the words of Shakespeare's plays as a list."""
@@ -224,9 +236,10 @@ def shakespeare_tokens(path='shakespeare.txt', url='http://composingprograms.com
         shakespeare = urlopen(url)
         return shakespeare.read().decode(encoding='ascii').split()
 
+
 # Uncomment the following two lines
-# tokens = shakespeare_tokens()
-# table = build_successors_table(tokens)
+tokens = shakespeare_tokens()
+table = build_successors_table(tokens)
 
 def random_sent():
     import random
