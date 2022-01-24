@@ -262,10 +262,12 @@ def interval(a, b):
 def lower_bound(x):
     """Return the lower bound of interval x."""
     "*** YOUR CODE HERE ***"
+    return x[0]
 
 def upper_bound(x):
     """Return the upper bound of interval x."""
     "*** YOUR CODE HERE ***"
+    return x[1]
 def str_interval(x):
     """Return a string representation of interval x.
     """
@@ -277,20 +279,26 @@ def add_interval(x, y):
     lower = lower_bound(x) + lower_bound(y)
     upper = upper_bound(x) + upper_bound(y)
     return interval(lower, upper)
+
 def mul_interval(x, y):
     """Return the interval that contains the product of any value in x and any
     value in y."""
-    p1 = x[0] * y[0]
-    p2 = x[0] * y[1]
-    p3 = x[1] * y[0]
-    p4 = x[1] * y[1]
-    return [min(p1, p2, p3, p4), max(p1, p2, p3, p4)]
+    p1 = lower_bound(x) * lower_bound(y)
+    p2 = lower_bound(x) * upper_bound(y)
+    p3 = upper_bound(x) * lower_bound(y)
+    p4 = upper_bound(x) * upper_bound(y)
+    return interval(min(p1, p2, p3, p4), max(p1, p2, p3, p4))
 
 
 def sub_interval(x, y):
     """Return the interval that contains the difference between any value in x
     and any value in y."""
     "*** YOUR CODE HERE ***"
+    p1 = lower_bound(x) - lower_bound(y)
+    p2 = lower_bound(x) - upper_bound(y)
+    p3 = upper_bound(x) - lower_bound(y)
+    p4 = upper_bound(x) - upper_bound(y)
+    return interval(min(p1, p2, p3, p4), max(p1, p2, p3, p4))
 
 
 def div_interval(x, y):
@@ -298,12 +306,25 @@ def div_interval(x, y):
     any value in y. Division is implemented as the multiplication of x by the
     reciprocal of y."""
     "*** YOUR CODE HERE ***"
+    assert not (lower_bound(y) <= 0 and 0 <= upper_bound(y)), "the divide interval should not span zero"
     reciprocal_y = interval(1/upper_bound(y), 1/lower_bound(y))
     return mul_interval(x, reciprocal_y)
 
 
 def multiple_references_explanation():
     return """The multiple reference problem..."""
+    """Eva is right.
+    Because when an uncertain number is used in computation, the interval span will extend no matter
+    which arithmetic is used(sub, add, mul, div).    The less these number is used, the tighter the 
+    error bounds would be.The multiple reference problem exists. The true value within a particular 
+    interval is fixed (though unknown).Nested combinations that refer to the same interval twice may
+    assume two different true values for the same interval, which is an error that results in intervals
+    that are larger than they should be. Consider the case of i * i, where i is an interval from -1 to 1.
+    No value within this interval, when squared, will give a negative result. However, our mul_interval 
+    function will allow us to choose 1 from the first reference to i and -1 from the second, giving an 
+    erroneous lower bound of -1. Hence, a program like par2 is better than par1 because it never combines the
+    same interval more than once.
+    """
 
 
 def quadratic(x, a, b, c):
@@ -316,6 +337,28 @@ def quadratic(x, a, b, c):
     '0 to 10'
     """
     "*** YOUR CODE HERE ***"
+    mid = -b / (2 * a)
+    if a > 0:
+        if upper_bound(x) <= mid:
+            return interval(a * upper_bound(x) * upper_bound(x) + b * upper_bound(x) + c,
+                            a * lower_bound(x) * lower_bound(x) + b * lower_bound(x) + c)
+        elif lower_bound(x) <= mid:
+            return interval(a * mid * mid + b * mid + c,
+                            max(a * upper_bound(x) * upper_bound(x) + b * upper_bound(x) + c,
+                                a * lower_bound(x) * lower_bound(x) + b * lower_bound(x) + c))
+        else:
+            return interval(a * lower_bound(x) * lower_bound(x) + b * lower_bound(x) + c,
+                            a * upper_bound(x) * upper_bound(x) + b * upper_bound(x) + c)
+    else:
+        if upper_bound(x) <= mid:
+            return interval(a * lower_bound(x) * lower_bound(x) + b * lower_bound(x) + c,
+                            a * upper_bound(x) * upper_bound(x) + b * upper_bound(x) + c)
+        elif lower_bound(x) <= mid:
+            return interval(min(a * upper_bound(x) * upper_bound(x) + b * upper_bound(x) + c,
+                                a * lower_bound(x) * lower_bound(x) + b * lower_bound(x) + c), a * mid * mid + b * mid + c)
+        else:
+            return interval(a * upper_bound(x) * upper_bound(x) + b * upper_bound(x) + c,
+                            a * lower_bound(x) * lower_bound(x) + b * lower_bound(x) + c)
 
 
 def par1(r1, r2):
@@ -326,6 +369,7 @@ def par2(r1, r2):
     rep_r1 = div_interval(one, r1)
     rep_r2 = div_interval(one, r2)
     return div_interval(one, add_interval(rep_r1, rep_r2))
+
 def check_par():
     """Return two intervals that give different results for parallel resistors.
 
@@ -335,8 +379,8 @@ def check_par():
     >>> lower_bound(x) != lower_bound(y) or upper_bound(x) != upper_bound(y)
     True
     """
-    r1 = interval(1, 1) # Replace this line!
-    r2 = interval(1, 1) # Replace this line!
+    r1 = interval(1, 2)
+    r2 = interval(3, 4)
     return r1, r2
 
 
