@@ -31,7 +31,7 @@ def is_arm(s):
     return type(s) == list and len(s) == 3 and s[0] == 'arm'
 
 def length(s):
-    """Select the length of a arm."""
+    """Select the length of an arm."""
     assert is_arm(s), "must call length on a arm"
     return s[1]
 
@@ -44,11 +44,13 @@ def planet(size):
     """Construct a planet of some size."""
     assert size > 0
     "*** YOUR CODE HERE ***"
+    return ['planet', size]
 
 def size(w):
     """Select the size of a planet."""
     assert is_planet(w), 'must call size on a planet'
     "*** YOUR CODE HERE ***"
+    return w[1]
 
 def is_planet(w):
     """Whether w is a planet."""
@@ -105,6 +107,12 @@ def balanced(m):
     True
     """
     "*** YOUR CODE HERE ***"
+    if is_planet(m):
+        return True
+    else:
+        assert is_mobile(m), "m must be a planet or a mobile"
+        left_torque, right_torque = total_weight(end(left(m))) * length(left(m)), total_weight(end(right(m))) * length(right(m))
+        return left_torque == right_torque and balanced(end(left(m))) and balanced(end(right(m)))
 
 def totals_tree(m):
     """Return a tree representing the mobile with its total weight at the root.
@@ -136,6 +144,12 @@ def totals_tree(m):
     True
     """
     "*** YOUR CODE HERE ***"
+    if is_planet(m):
+        return tree(size(m))
+    else:
+        left_tree = totals_tree(end(left(m)))
+        right_tree = totals_tree(end(right(m)))
+        return tree(total_weight(m), [left_tree, right_tree])
 
 
 def replace_leaf(t, find_value, replace_value):
@@ -168,6 +182,13 @@ def replace_leaf(t, find_value, replace_value):
     True
     """
     "*** YOUR CODE HERE ***"
+    if is_leaf(t):
+        if label(t) == find_value:
+            return tree(replace_value)
+        else:
+            return tree(label(t))
+    else:
+        return tree(label(t), [replace_leaf(b, find_value, replace_value) for b in branches(t)])
 
 
 def preorder(t):
@@ -181,6 +202,13 @@ def preorder(t):
     [2, 4, 6]
     """
     "*** YOUR CODE HERE ***"
+    if is_leaf(t):
+        return [label(t)]
+    else:
+        lst = [label(t)]
+        for b in branches(t):
+            lst += preorder(b)
+        return lst
 
 
 def has_path(t, phrase):
@@ -213,6 +241,18 @@ def has_path(t, phrase):
     """
     assert len(phrase) > 0, 'no path for empty phrases.'
     "*** YOUR CODE HERE ***"
+    if len(phrase) == 1:
+        return label(t) == phrase
+    else:
+        if label(t) != phrase[0]:
+            return False
+        has_path_lst = []
+        for b in branches(t):
+            has_path_lst += [has_path(b, phrase[1:])]
+        for i in has_path_lst:
+            if i:
+                return True
+        return False
 
 
 def interval(a, b):
