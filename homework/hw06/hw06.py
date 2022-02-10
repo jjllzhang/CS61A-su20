@@ -267,7 +267,7 @@ def path_yielder(t, value):
         yield path
 
 
-def remove_all(link , value):
+def remove_all(link, value):
     """Remove all the nodes containing value in link. Assume that the
     first element is never removed.
 
@@ -285,6 +285,13 @@ def remove_all(link , value):
     <0 1>
     """
     "*** YOUR CODE HERE ***"
+    if link.rest == Link.empty:
+        return
+    if link.rest.first == value:
+        link.rest = link.rest.rest
+        remove_all(link, value)
+    else:
+        remove_all(link.rest, value)
 
 
 def deep_map(f, link):
@@ -301,7 +308,18 @@ def deep_map(f, link):
     <<2 <4 6> 8> <<10>>>
     """
     "*** YOUR CODE HERE ***"
-
+    if link is Link.empty:
+        return link
+    if link.rest is Link.empty:
+        if not isinstance(link.first, Link):
+            return Link(f(link.first))
+        else:
+            return Link(deep_map(f, link.first))
+    else:
+        if not isinstance(link.first, Link):
+            return Link(f(link.first), deep_map(f, link.rest))
+        else:
+            return Link(deep_map(f, link.first), deep_map(f, link.rest))
 
 class Tree:
     """
